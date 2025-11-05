@@ -305,6 +305,10 @@ func read(t Format) (buf []byte, err error) {
 	switch t {
 	case FmtImage:
 		format = cFmtDIBV5
+	case FmtImageJPEG:
+		// Windows doesn't natively support JPEG clipboard format
+		// Fall back to reading as DIB and converting
+		format = cFmtDIBV5
 	case FmtText:
 		fallthrough
 	default:
@@ -358,6 +362,15 @@ func write(t Format, buf []byte) (<-chan struct{}, error) {
 		// var param uintptr
 		switch t {
 		case FmtImage:
+			err := writeImage(buf)
+			if err != nil {
+				errch <- err
+				closeClipboard.Call()
+				return
+			}
+		case FmtImageJPEG:
+			// Windows doesn't natively support JPEG clipboard format
+			// Convert JPEG to PNG and write as image
 			err := writeImage(buf)
 			if err != nil {
 				errch <- err

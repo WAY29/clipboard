@@ -47,6 +47,8 @@ func read(t Format) (buf []byte, err error) {
 		return []byte(s), nil
 	case FmtImage:
 		return nil, errUnsupported
+	case FmtImageJPEG:
+		return nil, errUnsupported
 	default:
 		return nil, errUnsupported
 	}
@@ -70,6 +72,8 @@ func write(t Format, buf []byte) (<-chan struct{}, error) {
 		}
 		return done, nil
 	case FmtImage:
+		return nil, errUnsupported
+	case FmtImageJPEG:
 		return nil, errUnsupported
 	default:
 		return nil, errUnsupported

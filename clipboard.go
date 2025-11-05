@@ -27,6 +27,10 @@ The most common operations are `Read` and `Write`. To use them:
 	clipboard.Write(clipboard.FmtImage, []byte("image data"))
 	clipboard.Read(clipboard.FmtImage)
 
+	// write/read image format data of the clipboard in JPEG format
+	clipboard.Write(clipboard.FmtImageJPEG, []byte("jpeg image data"))
+	clipboard.Read(clipboard.FmtImageJPEG)
+
 Note that read/write regarding image format assumes that the bytes are
 PNG encoded since it serves the alpha blending purpose that might be
 used in other graphical software.
@@ -78,8 +82,10 @@ type Format int
 const (
 	// FmtText indicates plain text clipboard format
 	FmtText Format = iota
-	// FmtImage indicates image/png clipboard format
-	FmtImage
+	// FmtImagePng indicates image/png clipboard format
+	FmtImagePng
+	// FmtImageJPEG indicates image/jpeg clipboard format
+	FmtImageJPEG
 )
 
 var (

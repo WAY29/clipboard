@@ -16,8 +16,10 @@ package clipboard
 
 unsigned int clipboard_read_string(void **out);
 unsigned int clipboard_read_image(void **out);
+unsigned int clipboard_read_image_jpeg(void **out);
 int clipboard_write_string(const void *bytes, NSInteger n);
 int clipboard_write_image(const void *bytes, NSInteger n);
+int clipboard_write_image_jpeg(const void *bytes, NSInteger n);
 NSInteger clipboard_change_count();
 */
 import "C"
@@ -37,8 +39,10 @@ func read(t Format) (buf []byte, err error) {
 	switch t {
 	case FmtText:
 		n = C.clipboard_read_string(&data)
-	case FmtImage:
+	case FmtImagePng:
 		n = C.clipboard_read_image(&data)
+	case FmtImageJPEG:
+		n = C.clipboard_read_image_jpeg(&data)
 	}
 	if data == nil {
 		return nil, errUnavailable
@@ -53,6 +57,10 @@ func read(t Format) (buf []byte, err error) {
 // write writes the given data to clipboard and
 // returns true if success or false if failed.
 func write(t Format, buf []byte) (<-chan struct{}, error) {
+	// use unbuffered data to prevent goroutine leak
+	changed := make(chan struct{}, 1)
+	cnt := C.long(C.clipboard_change_count())
+
 	var ok C.int
 	switch t {
 	case FmtText:
@@ -62,11 +70,18 @@ func write(t Format, buf []byte) (<-chan struct{}, error) {
 			ok = C.clipboard_write_string(unsafe.Pointer(&buf[0]),
 				C.NSInteger(len(buf)))
 		}
-	case FmtImage:
+	case FmtImagePng:
 		if len(buf) == 0 {
 			ok = C.clipboard_write_image(unsafe.Pointer(nil), 0)
 		} else {
 			ok = C.clipboard_write_image(unsafe.Pointer(&buf[0]),
+				C.NSInteger(len(buf)))
+		}
+	case FmtImageJPEG:
+		if len(buf) == 0 {
+			ok = C.clipboard_write_image_jpeg(unsafe.Pointer(nil), 0)
+		} else {
+			ok = C.clipboard_write_image_jpeg(unsafe.Pointer(&buf[0]),
 				C.NSInteger(len(buf)))
 		}
 	default:
@@ -76,16 +91,12 @@ func write(t Format, buf []byte) (<-chan struct{}, error) {
 		return nil, errUnavailable
 	}
 
-	// use unbuffered data to prevent goroutine leak
-	changed := make(chan struct{}, 1)
-	cnt := C.long(C.clipboard_change_count())
 	go func() {
 		for {
 			// not sure if we are too slow or the user too fast :)
 			time.Sleep(time.Second)
 			cur := C.long(C.clipboard_change_count())
 			if cnt != cur {
-				changed <- struct{}{}
 				close(changed)
 				return
 			}

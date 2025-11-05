@@ -68,6 +68,8 @@ func read(t Format) (buf []byte, err error) {
 		return readc("UTF8_STRING")
 	case FmtImage:
 		return readc("image/png")
+	case FmtImageJPEG:
+		return readc("image/jpeg")
 	}
 	return nil, errUnsupported
 }
@@ -105,6 +107,8 @@ func write(t Format, buf []byte) (<-chan struct{}, error) {
 		s = "UTF8_STRING"
 	case FmtImage:
 		s = "image/png"
+	case FmtImageJPEG:
+		s = "image/jpeg"
 	}
 
 	start := make(chan int)

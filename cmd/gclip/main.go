@@ -74,7 +74,9 @@ func cpy() error {
 
 	switch ext {
 	case ".png":
-		t = clipboard.FmtImage
+		t = clipboard.FmtImagePng
+	case ".jpeg", ".jpg":
+		t = clipboard.FmtImageJPEG
 	case ".txt":
 		fallthrough
 	default:
@@ -107,9 +109,11 @@ func cpy() error {
 func pst() (err error) {
 	var b []byte
 
-	b = clipboard.Read(clipboard.FmtText)
-	if b == nil {
-		b = clipboard.Read(clipboard.FmtImage)
+	for _, typ := range []clipboard.Format{clipboard.FmtText, clipboard.FmtImagePng, clipboard.FmtImageJPEG} {
+		b = clipboard.Read(typ)
+		if b != nil {
+			break
+		}
 	}
 
 	if *file != "" && b != nil {

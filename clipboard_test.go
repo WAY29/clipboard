@@ -64,14 +64,14 @@ func TestClipboard(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to read gold file: %v", err)
 		}
-		clipboard.Write(clipboard.FmtImage, data)
+		clipboard.Write(clipboard.FmtImagePng, data)
 
 		b := clipboard.Read(clipboard.FmtText)
 		if b != nil {
 			t.Fatalf("read clipboard that stores image data as text should fail, but got len: %d", len(b))
 		}
 
-		b = clipboard.Read(clipboard.FmtImage)
+		b = clipboard.Read(clipboard.FmtImagePng)
 		if b == nil {
 			t.Fatalf("read clipboard that stores image data as image should success, but got: nil")
 		}
@@ -122,7 +122,7 @@ func TestClipboard(t *testing.T) {
 		data := []byte("golang.design/x/clipboard")
 		clipboard.Write(clipboard.FmtText, data)
 
-		b := clipboard.Read(clipboard.FmtImage)
+		b := clipboard.Read(clipboard.FmtImagePng)
 		if b != nil {
 			t.Fatalf("read clipboard that stores text data as image should fail, but got len: %d", len(b))
 		}
@@ -148,7 +148,7 @@ func TestClipboardMultipleWrites(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read gold file: %v", err)
 	}
-	chg := clipboard.Write(clipboard.FmtImage, data)
+	chg := clipboard.Write(clipboard.FmtImagePng, data)
 
 	data = []byte("golang.design/x/clipboard")
 	clipboard.Write(clipboard.FmtText, data)
@@ -169,7 +169,7 @@ func TestClipboardMultipleWrites(t *testing.T) {
 		t.Fatalf("changed channel should be closed after receiving the notification")
 	}
 
-	b := clipboard.Read(clipboard.FmtImage)
+	b := clipboard.Read(clipboard.FmtImagePng)
 	if b != nil {
 		t.Fatalf("read clipboard that should store text data as image should fail, but got: %d", len(b))
 	}
@@ -204,7 +204,7 @@ func TestClipboardConcurrentRead(t *testing.T) {
 		defer func() {
 			done <- true
 		}()
-		clipboard.Read(clipboard.FmtImage)
+		clipboard.Read(clipboard.FmtImagePng)
 	}()
 	<-done
 	<-done
